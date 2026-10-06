@@ -1,0 +1,57 @@
+// SPDX-License-Identifier: GPL-2.0
+/* ALIENTEK ALPHA V2.7, 512 MiB DDR, eMMC: initial UART/eMMC bring-up.
+ * Pin settings derived from ALIENTEK Linux 4.1.15.
+ * Network, display, audio, USB and SD are not enabled yet.
+ */
+/dts-v1/;
+#include "imx6ull.dtsi"
+/ {
+    model = "ALIENTEK ALPHA V2.7 eMMC (minimal bring-up)";
+    compatible = "alientek,imx6ull-alpha-v27-emmc", "fsl,imx6ull";
+    chosen { stdout-path = "serial0:115200n8"; };
+    memory@80000000 {
+        device_type = "memory";
+        reg = <0x80000000 0x20000000>;
+    };
+};
+&clks {
+    assigned-clocks = <&clks IMX6UL_CLK_PLL3_PFD2>;
+    assigned-clock-rates = <320000000>;
+};
+&uart1 {
+    pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_uart1>;
+    status = "okay";
+};
+&usdhc2 {
+    pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_usdhc2_8bit>;
+    bus-width = <8>;
+    non-removable;
+    no-1-8-v;
+    max-frequency = <52000000>;
+    status = "okay";
+};
+&iomuxc {
+pinctrl_uart1: uart1grp {
+			fsl,pins = <
+				MX6UL_PAD_UART1_TX_DATA__UART1_DCE_TX 0x1b0b1
+				MX6UL_PAD_UART1_RX_DATA__UART1_DCE_RX 0x1b0b1
+			>;
+		};
+
+pinctrl_usdhc2_8bit: usdhc2grp_8bit {
+			fsl,pins = <
+				MX6UL_PAD_NAND_RE_B__USDHC2_CLK     0x10069
+				MX6UL_PAD_NAND_WE_B__USDHC2_CMD     0x17059
+				MX6UL_PAD_NAND_DATA00__USDHC2_DATA0 0x17059
+				MX6UL_PAD_NAND_DATA01__USDHC2_DATA1 0x17059
+				MX6UL_PAD_NAND_DATA02__USDHC2_DATA2 0x17059
+				MX6UL_PAD_NAND_DATA03__USDHC2_DATA3 0x17059
+				MX6UL_PAD_NAND_DATA04__USDHC2_DATA4 0x17059
+				MX6UL_PAD_NAND_DATA05__USDHC2_DATA5 0x17059
+				MX6UL_PAD_NAND_DATA06__USDHC2_DATA6 0x17059
+				MX6UL_PAD_NAND_DATA07__USDHC2_DATA7 0x17059
+			>;
+		};
+};

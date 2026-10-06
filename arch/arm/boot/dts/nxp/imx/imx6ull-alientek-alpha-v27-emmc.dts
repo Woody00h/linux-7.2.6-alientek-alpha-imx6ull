@@ -1,0 +1,119 @@
+// SPDX-License-Identifier: GPL-2.0
+/* ALIENTEK ALPHA V2.4, 512 MiB DDR, eMMC: UART/eMMC/ENET2 bring-up.
+ * Pin settings derived from ALIENTEK Linux 4.1.15.
+ * Display, audio, USB and SD are not enabled yet.
+ */
+/dts-v1/;
+#include "imx6ull.dtsi"
+/ {
+    model = "ALIENTEK ALPHA V2.4 eMMC (UART/eMMC/ENET2)";
+    compatible = "alientek,imx6ull-alpha-v24-emmc", "fsl,imx6ull";
+    chosen { stdout-path = "serial0:115200n8"; };
+    memory@80000000 {
+        device_type = "memory";
+        reg = <0x80000000 0x20000000>;
+    };
+};
+&clks {
+    assigned-clocks = <&clks IMX6UL_CLK_PLL3_PFD2>;
+    assigned-clock-rates = <320000000>;
+};
+&uart1 {
+    pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_uart1>;
+    status = "okay";
+};
+&usdhc2 {
+    pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_usdhc2_8bit>;
+    bus-width = <8>;
+    non-removable;
+    no-1-8-v;
+    max-frequency = <52000000>;
+    status = "okay";
+};
+&iomuxc {
+pinctrl_uart1: uart1grp {
+			fsl,pins = <
+				MX6UL_PAD_UART1_TX_DATA__UART1_DCE_TX 0x1b0b1
+				MX6UL_PAD_UART1_RX_DATA__UART1_DCE_RX 0x1b0b1
+			>;
+		};
+
+pinctrl_usdhc2_8bit: usdhc2grp_8bit {
+			fsl,pins = <
+				MX6UL_PAD_NAND_RE_B__USDHC2_CLK     0x10069
+				MX6UL_PAD_NAND_WE_B__USDHC2_CMD     0x17059
+				MX6UL_PAD_NAND_DATA00__USDHC2_DATA0 0x17059
+				MX6UL_PAD_NAND_DATA01__USDHC2_DATA1 0x17059
+				MX6UL_PAD_NAND_DATA02__USDHC2_DATA2 0x17059
+				MX6UL_PAD_NAND_DATA03__USDHC2_DATA3 0x17059
+				MX6UL_PAD_NAND_DATA04__USDHC2_DATA4 0x17059
+				MX6UL_PAD_NAND_DATA05__USDHC2_DATA5 0x17059
+				MX6UL_PAD_NAND_DATA06__USDHC2_DATA6 0x17059
+				MX6UL_PAD_NAND_DATA07__USDHC2_DATA7 0x17059
+			>;
+		};
+};
+
+/ {
+    aliases {
+        ethernet0 = &fec2;
+        /delete-property/ ethernet1;
+    };
+};
+
+&fec1 {
+    status = "disabled";
+};
+
+&fec2 {
+    pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_enet2 &pinctrl_enet2_reset>;
+    phy-mode = "rmii";
+    phy-handle = <&enet2_phy>;
+    assigned-clocks = <&clks IMX6UL_CLK_ENET2_REF_SEL>,
+                      <&clks IMX6UL_CLK_ENET2_REF>;
+    assigned-clock-parents = <&clks IMX6UL_CLK_ENET2_REF_125M>;
+    assigned-clock-rates = <0>, <50000000>;
+    status = "okay";
+
+    mdio {
+        #address-cells = <1>;
+        #size-cells = <0>;
+        /* Reset ENET2 before PHY ID detection. ENET1 is not enabled. */
+        reset-gpios = <&gpio5 8 GPIO_ACTIVE_LOW>;
+        reset-delay-us = <100000>;
+        reset-post-delay-us = <200000>;
+
+        enet2_phy: ethernet-phy@1 {
+            compatible = "ethernet-phy-ieee802.3-c22";
+            reg = <1>;
+        };
+    };
+};
+
+&iomuxc {
+    pinctrl_enet2: enet2grp {
+        fsl,pins = <
+            MX6UL_PAD_GPIO1_IO07__ENET2_MDC          0x1b0b0
+            MX6UL_PAD_GPIO1_IO06__ENET2_MDIO         0x1b0b0
+            MX6UL_PAD_ENET2_RX_EN__ENET2_RX_EN       0x1b0b0
+            MX6UL_PAD_ENET2_RX_ER__ENET2_RX_ER       0x1b0b0
+            MX6UL_PAD_ENET2_RX_DATA0__ENET2_RDATA00  0x1b0b0
+            MX6UL_PAD_ENET2_RX_DATA1__ENET2_RDATA01  0x1b0b0
+            MX6UL_PAD_ENET2_TX_EN__ENET2_TX_EN       0x1b0b0
+            MX6UL_PAD_ENET2_TX_DATA0__ENET2_TDATA00  0x1b0b0
+            MX6UL_PAD_ENET2_TX_DATA1__ENET2_TDATA01  0x1b0b0
+            MX6UL_PAD_ENET2_TX_CLK__ENET2_REF_CLK2   0x4001b031
+        >;
+    };
+};
+
+&iomuxc_snvs {
+    pinctrl_enet2_reset: enet2-reset-grp {
+        fsl,pins = <
+            MX6ULL_PAD_SNVS_TAMPER8__GPIO5_IO08 0x10b0
+        >;
+    };
+};
