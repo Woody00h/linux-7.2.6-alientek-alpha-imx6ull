@@ -119,3 +119,5 @@ pinctrl_usdhc2_8bit: usdhc2grp_8bit {
 };
 
 #include "alpha-led.dtsi"
+
+#include "alpha-key.dtsi"
