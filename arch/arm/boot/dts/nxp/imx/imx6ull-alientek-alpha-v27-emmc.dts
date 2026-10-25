@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 /* ALIENTEK ALPHA V2.4, 512 MiB DDR, eMMC: UART/eMMC/ENET2 bring-up.
  * Pin settings derived from ALIENTEK Linux 4.1.15.
- * Display, USB and SD are not enabled yet.
+ * USB and SD are not enabled yet. LCD: ATK-MD0700R-1024600.
  */
 /dts-v1/;
 #include "imx6ull.dtsi"
@@ -123,3 +123,5 @@ pinctrl_usdhc2_8bit: usdhc2grp_8bit {
 #include "alpha-key.dtsi"
 
 #include "alpha-audio.dtsi"
+
+#include "alpha-lcd.dtsi"
