@@ -125,3 +125,5 @@ pinctrl_usdhc2_8bit: usdhc2grp_8bit {
 #include "alpha-audio.dtsi"
 
 #include "alpha-lcd.dtsi"
+
+#include "alpha-pwm.dtsi"
