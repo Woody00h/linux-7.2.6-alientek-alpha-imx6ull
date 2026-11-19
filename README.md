@@ -130,9 +130,19 @@ if fatload mmc 1:1 80800000 zImage; then if fatload mmc 1:1 83000000 imx6ull-ali
 
 ```bash
 make O=out ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- alpha_usb_bluetooth.config
-make O=out ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j"$(nproc)" \
+scripts/config --file out/.config --disable LOCALVERSION_AUTO
+make O=out ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- LOCALVERSION= -j"$(nproc)" \
     zImage nxp/imx/imx6ull-alientek-alpha-v27-emmc.dtb
+cat out/include/config/kernel.release
 ```
+
+沿用为 `7.2.6` 构建的外置 Wi-Fi 模块时，上述版本输出必须是 `7.2.6`，
+不能带 Git 后缀。若内核配置或导出符号发生变化，还需检查模块兼容性。
+仅构建 `zImage` 时，Kbuild 更新的是 `out/vmlinux.symvers`，外置模块读取的
+`out/Module.symvers` 可能仍是旧文件。用上述命令成功构建内核后，
+先执行 `cp out/vmlinux.symvers out/Module.symvers`，再重编 AIC8800DC
+模块。若已为同一内核完整构建内核模块，则直接使用该构建生成的
+`out/Module.symvers`。
 
 片段将 `btusb` 编入内核，插入适配器后由 USB 自动匹配。内核已包含该
 USB ID 的 ATS2851 兼容处理。板上启动新内核后，将适配器从电脑拔下，插入
