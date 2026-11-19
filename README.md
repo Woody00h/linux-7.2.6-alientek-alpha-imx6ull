@@ -123,3 +123,34 @@ if fatload mmc 1:1 80800000 zImage; then if fatload mmc 1:1 83000000 imx6ull-ali
 - PHY：地址为 1；Linux MDIO 复位低电平 100000us，释放后等待 200000us。U-Boot 的同类属性以毫秒计，不能混用。
 - 修改 DTS 后必须重新编译并复制新 DTB，不能只更新 zImage。
 - 上游源码中的 README、Documentation 保留，本文仅描述本板工作流。
+
+## 7. USB 蓝牙适配器（Actions ATS2851，10d7:b012）
+
+在现有 Alpha 配置上合并蓝牙片段，然后构建内核和板级 DTB：
+
+```bash
+make O=out ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- alpha_usb_bluetooth.config
+make O=out ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j"$(nproc)" \
+    zImage nxp/imx/imx6ull-alientek-alpha-v27-emmc.dtb
+```
+
+片段将 `btusb` 编入内核，插入适配器后由 USB 自动匹配。内核已包含该
+USB ID 的 ATS2851 兼容处理。板上启动新内核后，将适配器从电脑拔下，插入
+Alpha 的 USB Host 口，以 root 运行：
+
+```sh
+dmesg | grep -Ei '10d7|b012|bluetooth|btusb'
+ls -l /sys/class/bluetooth
+btmgmt info
+btmgmt power off
+btmgmt le on
+btmgmt power on
+btmgmt find -l
+```
+
+`btmgmt` 是 BlueZ 的命令行工具，可直接通过内核管理接口检查控制器、上电和
+扫描。上述命令只扫描 BLE，测试设备应处于广播状态，按 Ctrl-C 结束。
+使用 `btmgmt find -b` 扫描处于可发现状态的经典蓝牙设备。
+已在 Alpha 板上验证控制器枚举、上电及 BLE 扫描，配对和连接尚未验证。使用
+`bluetoothctl` 交互配对时，目标 rootfs 还需要 BlueZ 的 `bluetoothd`
+和运行中的 D-Bus 系统总线。

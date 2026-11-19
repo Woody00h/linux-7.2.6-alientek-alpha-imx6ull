@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 /* ALIENTEK ALPHA V2.4, 512 MiB DDR, eMMC: UART/eMMC/ENET2 bring-up.
  * Pin settings derived from ALIENTEK Linux 4.1.15.
- * USB and SD are not enabled yet. LCD: ATK-MD0700R-1024600.
+ * SD is not enabled yet. LCD: ATK-MD0700R-1024600.
  */
 /dts-v1/;
 #include "imx6ull.dtsi"
@@ -23,6 +23,29 @@
     pinctrl-0 = <&pinctrl_uart1>;
     status = "okay";
 };
+&usbotg1 {
+    /* Host test via Type-C OTG adapter; VBUS switching is handled on-board. */
+    dr_mode = "host";
+    disable-over-current;
+    status = "okay";
+};
+
+&usbotg2 {
+    /* SL2.1A hub and downstream ports use the board's fixed 5 V rail. */
+    dr_mode = "host";
+    disable-over-current;
+    status = "okay";
+};
+
+/* Match the ALIENTEK BSP's raw TX D_CAL value of 5. */
+&usbphy1 {
+    fsl,tx-d-cal = <106>;
+};
+
+&usbphy2 {
+    fsl,tx-d-cal = <106>;
+};
+
 &usdhc2 {
     pinctrl-names = "default";
     pinctrl-0 = <&pinctrl_usdhc2_8bit>;
