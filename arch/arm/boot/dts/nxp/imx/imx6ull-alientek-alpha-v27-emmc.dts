@@ -150,3 +150,43 @@ pinctrl_usdhc2_8bit: usdhc2grp_8bit {
 #include "alpha-lcd.dtsi"
 
 #include "alpha-pwm.dtsi"
+
+/ {
+    reg_imu_3v3: regulator-imu-3v3 {
+        compatible = "regulator-fixed";
+        regulator-name = "imu-3v3";
+        regulator-min-microvolt = <3300000>;
+        regulator-max-microvolt = <3300000>;
+        regulator-always-on;
+    };
+};
+
+&ecspi3 {
+    /* The IMU uses short transfers. Allow probing without the SDMA module. */
+    /delete-property/ dmas;
+    /delete-property/ dma-names;
+
+    pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_ecspi3_imu>;
+    cs-gpios = <&gpio1 20 GPIO_ACTIVE_LOW>;
+    status = "okay";
+
+    imu@0 {
+        compatible = "invensense,icm20608";
+        reg = <0>;
+        spi-max-frequency = <1000000>;
+        vdd-supply = <&reg_imu_3v3>;
+        vddio-supply = <&reg_imu_3v3>;
+    };
+};
+
+&iomuxc {
+    pinctrl_ecspi3_imu: ecspi3-imugrp {
+        fsl,pins = <
+            MX6UL_PAD_UART2_TX_DATA__GPIO1_IO20   0x1b0b0
+            MX6UL_PAD_UART2_RX_DATA__ECSPI3_SCLK  0x100b1
+            MX6UL_PAD_UART2_CTS_B__ECSPI3_MOSI    0x100b1
+            MX6UL_PAD_UART2_RTS_B__ECSPI3_MISO    0x100b1
+        >;
+    };
+};
